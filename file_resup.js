@@ -44,6 +44,7 @@
       });
       $drop.prepend($ul);
     }
+    $drop.siblings('.button.browse').toggleClass('disabled', !canAddFiles(r));
     updateUploadButton($drop.siblings('.button.upload'), r);
   };
 
@@ -70,6 +71,11 @@
   var updateUploadButton = function($upload, r) {
     var uploading = r.uploading;
     $upload.html('<span>' + (uploading ? Drupal.t('Cancel') : Drupal.t('Upload')) + '</span>').toggleClass('cancel', uploading).toggleClass('disabled', !r.files.length);
+  };
+
+  var canAddFiles = function(r) {
+    var maxFiles = r.options.maxFiles;
+    return !maxFiles || maxFiles == 1 || r.files.length < maxFiles;
   };
 
   // Drupal behavior.
@@ -110,7 +116,9 @@
 
         // Add the drop area.
         var $drop = $('<div class="item-list drop"><div class="drop-message">' + $this.data('drop-message') + '</div></div>').bind('drop', function(e) {
-          clearErrors($wrapper);
+          if (canAddFiles(r)) {
+            clearErrors($wrapper);
+          }
           e.preventDefault();
         }).appendTo($wrapper);
 
@@ -139,8 +147,10 @@
 
         // Add the Browse button.
         $('<a href="#" class="button browse"><span>' + Drupal.t('Browse') + '</span></a>').click(function(e) {
-          clearErrors($wrapper);
-          $input.click();
+          if (canAddFiles(r)) {
+            clearErrors($wrapper);
+            $input.click();
+          }
           e.preventDefault();
         }).appendTo($wrapper).after($input);
 
@@ -169,10 +179,12 @@
 
         // Handle the resupaddedfileerror event.
         r.onresupaddedfileerror = function(file, error) {
-          addError($wrapper, error == 'size' ? Drupal.t('File %filename is %filesize, exceeding the maximum file size of %maxsize.', {
+          addError($wrapper, error == 'size' ? file.size ? Drupal.t('File %filename is %filesize, exceeding the maximum file size of %maxsize.', {
               '%filename': file.name,
               '%filesize': formatSize(file.size),
               '%maxsize': formatSize(maxFileSize)
+            }) : Drupal.t('File %filename is empty. Empty files cannot be uploaded.', {
+              '%filename': file.name
             }) : Drupal.t('File %filename cannot be uploaded. Only files with the following extensions are allowed: %extensions.', {
               '%filename': file.name,
               '%extensions': extensions.join(', ')
