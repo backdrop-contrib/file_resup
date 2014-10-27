@@ -8,7 +8,7 @@
 
 require_once dirname(__FILE__) . '/file_resup.field.inc';
 
-define('FILE_RESUP_DEFAULT_CHUNKSIZE', 2 *1024 * 1024);
+define('FILE_RESUP_DEFAULT_CHUNKSIZE', 2 * 1024 * 1024);
 define('FILE_RESUP_TEMPORARY', 'file_resup_temporary');
 
 /**
@@ -198,6 +198,9 @@ function file_resup_upload() {
     drupal_exit();
   }
 
+  // Commit the transaction.
+  unset($transaction);
+
   // Flush the output then unlock and close the file.
   fflush($fp);
   flock($fp, LOCK_UN);
@@ -360,7 +363,7 @@ function file_resup_save_upload($element, $resup_file_id) {
  */
 function file_resup_file_presave($file) {
   // On 32bit platforms, filesize() may return unexpected results for files
-  // larger than 2GB and make drupal_write_record() crash.
+  // larger than 2 GB and make drupal_write_record() crash.
   if (isset($file->file_resup_filesize)) {
     $file->filesize = $file->file_resup_filesize;
   }
@@ -375,7 +378,7 @@ function file_resup_file_presave($file) {
  * Implements hook_file_insert().
  */
 function file_resup_file_insert($file) {
-  // drupal_write_record() cannot write a file size greater than 2GB on 32bit
+  // drupal_write_record() cannot write a file size greater than 2 GB on 32bit
   // platforms.
   if ($file->filesize > PHP_INT_MAX) {
     db_query('UPDATE {file_managed} SET filesize = :filesize WHERE fid = :fid', array(':filesize' => $file->filesize, ':fid' => $file->fid));
