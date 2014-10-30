@@ -399,9 +399,12 @@ function file_resup_upload_load($upload_id) {
   $upload = db_query('SELECT * FROM {file_resup} WHERE upload_id = :upload_id', array(':upload_id' => $upload_id))->fetchObject();
 
   // If the upload has a fid, ensure it is still valid.
-  if (!empty($upload->fid) && !file_load($upload->fid)) {
-    file_resup_upload_delete_record($upload);
-    return;
+  if (!empty($upload->fid)) {
+    $file = file_load($upload->fid);
+    if (!$file || file_uri_scheme($file->uri) != 'public' && !file_download_access($file->uri)) {
+      file_resup_upload_delete_record($upload);
+      return;
+    }
   }
 
   return $upload;
