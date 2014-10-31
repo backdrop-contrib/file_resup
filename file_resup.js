@@ -29,6 +29,27 @@
     }
   };
 
+  var formatInterval = function(interval) {
+    var granularity = 2;
+    var output = '';
+    $.each([24 * 60 * 60, 60 * 60, 60, 1], function(i, value) {
+      if (interval >= value) {
+        var count = Math.floor(interval / value);
+        var plural =
+          i == 0 ? Drupal.formatPlural(count, '1 day', '@count days') :
+          i == 1 ? Drupal.formatPlural(count, '1 hour', '@count hours') :
+          i == 2 ? Drupal.formatPlural(count, '1 min', '@count min') : Drupal.formatPlural(count, '1 sec', '@count sec');
+        output += (output ? ' ' : '') + plural;
+        interval %= value;
+        granularity--;
+      }
+      if (!granularity) {
+        return false;
+      }
+    });
+    return output ? output : Drupal.t('0 sec');
+  };
+
   var updateFileList = function(r, $drop) {
     $('.file-list', $drop).remove();
     if (r.files.length) {
@@ -78,6 +99,10 @@
     return !maxFiles || maxFiles == 1 || r.files.length < maxFiles;
   };
 
+  var now = function() {
+    return (new Date()).getTime();
+  };
+
   // Drupal behavior.
   Drupal.behaviors.fileResup = {
     attach: function(context, settings) {
@@ -85,7 +110,7 @@
         this.id = 'file-resup-' + _index++;
         var $this = $(this).val('');
         var $wrapper = $this.closest('.file-resup-wrapper');
-        var bar, completing;
+        var bar, completing, p0, t0, progressMessage, lastMessageTime;
 
         // Ensure browser supports Resup.
         if (!Resup.support) {
@@ -168,7 +193,9 @@
                 bar = new Drupal.progressBar('ajax-progress-' + $this.attr('id'));
                 $drop.after(bar.element);
               }
-              bar.setProgress(0, Drupal.t('Starting upload...'));
+              p0 = 0;
+              progressMessage = Drupal.t('Uploading...');
+              bar.setProgress(0, progressMessage);
               bar.element.show();
               r.retry();
               updateUploadButton($upload, r);
@@ -205,8 +232,24 @@
         // Handle the resupprogress event.
         r.onresupprogress = function() {
           var p = r.getProgress();
-          var message = p < 1 ? Drupal.t('Uploading...') : Drupal.t('Completing upload...');
-          bar.setProgress((Math.round(p * 1000) / 10).toFixed(1), message);
+          if (p) {
+            if (!p0) {
+              t0 = lastMessageTime = now();
+              p0 = p;
+            }
+            else if (p < 1) {
+              var time = now();
+              if (time - lastMessageTime > 999 && p > p0) {
+                lastMessageTime = time;
+                var remaining = (time - t0) * (1 - p) / (p - p0);
+                progressMessage = Drupal.t('Uploading... (@time remaining)', {'@time': formatInterval(Math.round(remaining / 1000))});
+              }
+            }
+            else {
+              progressMessage = Drupal.t('Completing upload...');
+            }
+            bar.setProgress((Math.round(p * 1000) / 10).toFixed(1), progressMessage);
+          }
         };
 
         // Handle the resupended event.
