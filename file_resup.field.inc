@@ -15,6 +15,7 @@ function file_resup_field_info_alter(&$info) {
       $info[$type]['instance_settings'] += array(
         'resup' => 0,
         'resup_max_filesize' => '',
+        'resup_autostart' => 0,
       );
     }
   }
@@ -49,6 +50,13 @@ function file_resup_form_field_ui_field_edit_form_alter(&$form, &$form_state, $f
       '#description' => t("You may enter a value greater than the default maximum upload size above. It can exceed PHP's maximum post and file upload sizes as well."),
       '#size' => 10,
       '#element_validate' => array('_file_generic_settings_max_filesize'),
+    );
+
+    $additions['resup_settings']['resup_autostart'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Start upload on files added'),
+      '#default_value' => $settings['resup_autostart'],
+      '#description' => t('When checked, upload will start as soon as files are added without requiring to click <em>Upload</em>, unless some of the added files did not pass validation.'),
     );
 
     $form['instance']['settings'] += $additions;
@@ -130,6 +138,11 @@ function file_resup_field_widget_process($element, &$form_state, $form) {
   // Add the maximum number of files as a data attribute.
   if ($max_files > -1) {
     $element['resup']['#attributes']['data-max-files'] = $max_files;
+  }
+
+  // Add autostart as a data attribute.
+  if ($instance['settings']['resup_autostart']) {
+    $element['resup']['#attributes']['data-autostart'] = 'on';
   }
 
   $element['upload_button']['#submit'][] = 'file_resup_field_widget_submit';

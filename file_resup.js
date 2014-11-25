@@ -221,11 +221,15 @@
 
         // Handle the resupfilesadded event.
         r.onresupfilesadded = function(addedFiles, skipped) {
-          if (skipped > 1 && $('.file-upload-js-error', $wrapper).length) {
+          var errors = $('.file-upload-js-error', $wrapper).length;
+          if (skipped > 1 && errors) {
             addError($wrapper, Drupal.t('@count files in total were skipped.', {'@count': skipped}));
           }
           if (addedFiles.length) {
             updateFileList(r, $drop);
+            if (!r.uploading && !errors && $this.data('autostart')) {
+              $upload.click();
+            }
           }
         };
 
@@ -238,10 +242,10 @@
               p0 = p;
             }
             else if (p < 1) {
-              var time = now();
-              if (time - lastMessageTime > 999 && p > p0) {
-                lastMessageTime = time;
-                var remaining = (time - t0) * (1 - p) / (p - p0);
+              var t = now();
+              if (t - lastMessageTime > 999 && p > p0) {
+                lastMessageTime = t;
+                var remaining = (t - t0) * (1 - p) / (p - p0);
                 progressMessage = Drupal.t('Uploading... (@time remaining)', {'@time': formatInterval(Math.round(remaining / 1000))});
               }
             }
