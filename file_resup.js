@@ -110,7 +110,7 @@
         this.id = 'file-resup-' + _index++;
         var $this = $(this).val('');
         var $wrapper = $this.closest('.file-resup-wrapper');
-        var bar, completing, p0, t0, progressMessage, lastMessageTime;
+        var bar, completing, progressMessage, lastTime;
 
         // Ensure browser supports Resup.
         if (!Resup.support) {
@@ -193,10 +193,9 @@
                 bar = new Drupal.progressBar('ajax-progress-' + $this.attr('id'));
                 $drop.after(bar.element);
               }
-              p0 = 0;
-              progressMessage = Drupal.t('Uploading...');
-              bar.setProgress(0, progressMessage);
+              bar.setProgress(0, Drupal.t('Starting upload...'));
               bar.element.show();
+              lastTime = 0;
               r.retry();
               updateUploadButton($upload, r);
             }
@@ -237,16 +236,17 @@
         r.onresupprogress = function() {
           var p = r.getProgress();
           if (p) {
-            if (!p0) {
-              t0 = lastMessageTime = now();
-              p0 = p;
-            }
-            else if (p < 1) {
-              var t = now();
-              if (t - lastMessageTime > 999 && p > p0) {
-                lastMessageTime = t;
-                var remaining = (t - t0) * (1 - p) / (p - p0);
-                progressMessage = Drupal.t('Uploading... (@time remaining)', {'@time': formatInterval(Math.round(remaining / 1000))});
+            if (p < 1) {
+              if (!lastTime) {
+                progressMessage = Drupal.t('Uploading...');
+              }
+              var time = now(), remaining;
+              if (time - lastTime > 999) {
+                lastTime = time;
+                remaining = r.getTime();
+                if (remaining > -1) {
+                  progressMessage = Drupal.t('Uploading... (@time remaining)', {'@time': formatInterval(remaining)});
+                }
               }
             }
             else {
