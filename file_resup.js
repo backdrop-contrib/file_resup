@@ -4,7 +4,7 @@
  * http://www.absyx.fr
  */
 
-(function($, Drupal) {
+(function($) {
   'use strict';
 
   // Static variable.
@@ -308,4 +308,4 @@
     }
   };
 
-})(jQuery, Drupal);
+})(jQuery);
