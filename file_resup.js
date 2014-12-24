@@ -121,7 +121,7 @@
 
         // Hide the default upload elements.
         var $uploadField = $('input[name="' + $this.data('upload-name') + '"]').hide();
-        var $uploadButton = $('input[name="' + $this.data('upload-button-name') + '"]').hide();
+        var $uploadButton = $('[name="' + $this.data('upload-button-name') + '"]').hide();
 
         // Disable the default progress indicator.
         Drupal.ajax[$uploadButton.attr('id')].progress.type = 'none';
