@@ -181,6 +181,12 @@
 
         // Add the Upload button.
         var $upload = $('<a href="#" class="button upload disabled"><span>' + Drupal.t('Upload') + '</span></a>').click(function(e) {
+          clickUpload();
+          e.preventDefault();
+        }).appendTo($wrapper);
+
+        // Process clicks on Upload.
+        var clickUpload = function() {
           if (!completing) {
             if (r.uploading) {
               r.stop();
@@ -200,8 +206,7 @@
               updateUploadButton($upload, r);
             }
           }
-          e.preventDefault();
-        }).appendTo($wrapper);
+        };
 
         // Handle the resupaddedfileerror event.
         r.onresupaddedfileerror = function(file, error) {
@@ -227,7 +232,7 @@
           if (addedFiles.length) {
             updateFileList(r, $drop);
             if (!r.uploading && !errors && $this.data('autostart')) {
-              $upload.click();
+              clickUpload();
             }
           }
         };

@@ -120,7 +120,7 @@ function file_resup_field_widget_process($element, &$form_state, $form) {
       'css' => array($path . '/file_resup.css'),
       'js' => array(
         $path . '/js/resup.min.js',
-        $path . '/file_resup.min.js',
+        $path . '/file_resup.js',
         array(
           'type' => 'setting',
           'data' => array('file_resup' => array('chunk_size' => file_resup_chunksize())),
