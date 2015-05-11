@@ -103,6 +103,7 @@ function file_resup_field_widget_process($element, &$form_state, $form) {
     '#type' => 'hidden',
     '#value_callback' => 'file_resup_value',
     '#field_name' => $element['#field_name'],
+    '#field_parents' => $element['#field_parents'],
     '#upload_location' => $element['#upload_location'],
     '#file_resup_upload_validators' => $upload_validators,
     '#attributes' => array(
