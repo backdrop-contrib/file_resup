@@ -268,6 +268,12 @@ function file_resup_save_upload($element, $resup_file_id) {
   $file->filemime = file_get_mimetype($file->filename);
   $file->filesize = $upload->filesize;
 
+  // Support Transliteration.
+  if (module_exists('transliteration') && variable_get('transliteration_file_uploads', TRUE)) {
+    $orig_filename = $file->filename;
+    $file->filename = transliteration_clean_filename($file->filename);
+  }
+
   // Munge the filename.
   $validators = $element['#file_resup_upload_validators'];
   $extensions = '';
@@ -343,6 +349,11 @@ function file_resup_save_upload($element, $resup_file_id) {
 
   // Set the permissions on the new file.
   drupal_chmod($file->uri);
+
+  // Transliteration support: restore the original filename if configured so.
+  if (isset($orig_filename) && !variable_get('transliteration_file_uploads_display_name', TRUE)) {
+    $file->filename = $orig_filename;
+  }
 
   // Save the file object to the database.
   $file->file_resup_filesize = $upload->filesize;
