@@ -214,9 +214,8 @@ function file_resup_field_widget_submit($form, &$form_state) {
   // Append our items.
   if (!empty($element['resup']['#value'])) {
     $fids = array_diff(explode(',', $element['resup']['#value']), $fids);
-    $end = end($items);
     foreach ($fids as $fid) {
-      $items[] = array_merge($end, array('fid' => $fid));
+      $items[] = array('fid' => $fid);
     }
   }
 
