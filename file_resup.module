@@ -432,7 +432,10 @@ function file_resup_upload_delete_record($upload) {
  * Delete an upload file.
  */
 function file_resup_upload_delete_file($upload) {
-  file_unmanaged_delete(file_resup_upload_uri($upload));
+  $uri = file_resup_upload_uri($upload);
+  if (file_exists($uri)) {
+    file_unmanaged_delete($uri);
+  }
 }
 
 /**
