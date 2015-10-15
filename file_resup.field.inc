@@ -238,7 +238,22 @@ function file_resup_field_widget_pre_render($element) {
  * Check whether our module has support for a widget type.
  */
 function file_resup_field_widget_support($widget_type) {
-  return $widget_type == 'file_generic' || $widget_type == 'image_image';
+  $supported_types = &drupal_static(__FUNCTION__);
+
+  if (!isset($supported_types)) {
+    $supported_types = module_invoke_all('file_resup_supported_field_widget_types');
+    $supported_types = array_combine($supported_types, $supported_types);
+    drupal_alter('file_resup_supported_field_widget_types', $supported_types);
+  }
+
+  return !empty($supported_types[$widget_type]);
+}
+
+/**
+ * Implements hook_file_resup_supported_field_widget_types().
+ */
+function file_resup_file_resup_supported_field_widget_types() {
+  return array('file_generic', 'image_image');
 }
 
 /**
