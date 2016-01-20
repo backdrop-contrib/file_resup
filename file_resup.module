@@ -214,6 +214,7 @@ function file_resup_upload() {
  * Returns data as plain text.
  */
 function file_resup_plain_output($text = '') {
+  drupal_page_is_cacheable(FALSE);
   drupal_add_http_header('Content-Type', 'text/plain');
   echo $text;
 }
