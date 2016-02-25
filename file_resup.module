@@ -413,7 +413,7 @@ function file_resup_upload_load($upload_id) {
   // If the upload has a fid, ensure it is still valid.
   if (!empty($upload->fid)) {
     $file = file_load($upload->fid);
-    if (!$file || file_uri_scheme($file->uri) != 'public' && !file_download_access($file->uri)) {
+    if (!$file || !in_array(file_uri_scheme($file->uri), variable_get('file_public_schema', array('public'))) && !file_download_access($file->uri)) {
       file_resup_upload_delete_record($upload);
       return;
     }
