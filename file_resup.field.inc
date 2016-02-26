@@ -155,12 +155,25 @@ function file_resup_field_widget_process($element, &$form_state, $form) {
 /**
  * #file_value_callbacks callback for the field widget element.
  */
-function file_resup_field_widget_value($element, &$input, $form_state) {
+function file_resup_field_widget_value(&$element, &$input, $form_state) {
   if (!empty($input['resup'])) {
     $resup_file_ids = explode(',', $input['resup']);
     $resup_file_id = reset($resup_file_ids);
     if ($file = file_resup_save_upload($element, $resup_file_id)) {
       $input['fid'] = $file->fid;
+      // When anonymous, file_managed_file_value() does not allow previously
+      // uploaded temporary files to be reused, so we also need to pass fid
+      // through element's default value.
+      if ($file->status != FILE_STATUS_PERMANENT && !$GLOBALS['user']->uid) {
+        if ($element['#extended']) {
+          $element['#default_value']['fid'] = $file->fid;
+          // 'display' must be passed as well, as an integer.
+          $element['#default_value']['display'] = $input['display'];
+        }
+        else {
+          $element['#default_value'] = $file->fid;
+        }
+      }
     }
   }
 }
