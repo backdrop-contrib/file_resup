@@ -88,7 +88,7 @@ function file_resup_field_widget_form_alter(&$element, &$form_state, $context) {
  * #process callback for the field widget element.
  */
 function file_resup_field_widget_process($element, &$form_state, $form) {
-  $path = drupal_get_path('module', 'file_resup');
+  $path = backdrop_get_path('module', 'file_resup');
   $max_files = $element['#file_resup_max_files'];
 
   // Get the upload validators and build a new description.
@@ -155,25 +155,12 @@ function file_resup_field_widget_process($element, &$form_state, $form) {
 /**
  * #file_value_callbacks callback for the field widget element.
  */
-function file_resup_field_widget_value(&$element, &$input, $form_state) {
+function file_resup_field_widget_value($element, &$input, $form_state) {
   if (!empty($input['resup'])) {
     $resup_file_ids = explode(',', $input['resup']);
     $resup_file_id = reset($resup_file_ids);
     if ($file = file_resup_save_upload($element, $resup_file_id)) {
       $input['fid'] = $file->fid;
-      // When anonymous, file_managed_file_value() does not allow previously
-      // uploaded temporary files to be reused, so we also need to pass fid
-      // through element's default value.
-      if ($file->status != FILE_STATUS_PERMANENT && !$GLOBALS['user']->uid) {
-        if ($element['#extended']) {
-          $element['#default_value']['fid'] = $file->fid;
-          // 'display' must be passed as well, as an integer.
-          $element['#default_value']['display'] = $input['display'];
-        }
-        else {
-          $element['#default_value'] = $file->fid;
-        }
-      }
     }
   }
 }
@@ -205,7 +192,7 @@ function file_resup_value($element, $input = FALSE, $form_state = array()) {
  */
 function file_resup_field_widget_submit($form, &$form_state) {
   $button = $form_state['triggering_element'];
-  $element = drupal_array_get_nested_value($form, array_slice($button['#array_parents'], 0, -1));
+  $element = backdrop_array_get_nested_value($form, array_slice($button['#array_parents'], 0, -1));
   $field_name = $element['#field_name'];
   $langcode = $element['#language'];
   $parents = $element['#field_parents'];
@@ -227,18 +214,12 @@ function file_resup_field_widget_submit($form, &$form_state) {
   // Append our items.
   if (!empty($element['resup']['#value'])) {
     $fids = array_diff(explode(',', $element['resup']['#value']), $fids);
-    $field = field_widget_field($element, $form_state);
     foreach ($fids as $fid) {
-      $item = array('fid' => $fid);
-      // Respect display default when available.
-      if (!empty($field['settings']['display_field'])) {
-        $item['display'] = $field['settings']['display_default'];
-      }
-      $items[] = $item;
+      $items[] = array('fid' => $fid);
     }
   }
 
-  drupal_array_set_nested_value($form_state['values'], array_slice($button['#array_parents'], 0, -2), $items);
+  backdrop_array_set_nested_value($form_state['values'], array_slice($button['#array_parents'], 0, -2), $items);
   $field_state['items'] = $items;
   field_form_set_state($parents, $field_name, $langcode, $form_state, $field_state);
 }
@@ -257,12 +238,12 @@ function file_resup_field_widget_pre_render($element) {
  * Check whether our module has support for a widget type.
  */
 function file_resup_field_widget_support($widget_type) {
-  $supported_types = &drupal_static(__FUNCTION__);
+  $supported_types = &backdrop_static(__FUNCTION__);
 
   if (!isset($supported_types)) {
     $supported_types = module_invoke_all('file_resup_supported_field_widget_types');
     $supported_types = array_combine($supported_types, $supported_types);
-    drupal_alter('file_resup_supported_field_widget_types', $supported_types);
+    backdrop_alter('file_resup_supported_field_widget_types', $supported_types);
   }
 
   return !empty($supported_types[$widget_type]);

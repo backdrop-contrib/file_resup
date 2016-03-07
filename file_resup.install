@@ -66,7 +66,10 @@ function file_resup_schema() {
  * Implements hook_install().
  */
 function file_resup_install() {
-  variable_set('file_resup_chunksize', min(FILE_RESUP_DEFAULT_CHUNKSIZE, file_upload_max_size()));
+  config_set('file_resup.settings', 'file_resup_chunksize', min(FILE_RESUP_DEFAULT_CHUNKSIZE, file_upload_max_size() ) );
+  config_set('file_resup.settings', 'transliteration_file_uploads', TRUE);
+  config_set('file_resup.settings', 'allow_insecure_uploads', 0);
+  config_set('file_resup.settings', 'transliteration_file_uploads_display_name', TRUE);
 }
 
 /**
@@ -74,7 +77,7 @@ function file_resup_install() {
  */
 function file_resup_uninstall() {
   // Delete the file_resup_temporary directories.
-  drupal_load('module', 'file_resup');
+  backdrop_load('module', 'file_resup');
   $schemes = array_keys(file_get_stream_wrappers(STREAM_WRAPPERS_WRITE_VISIBLE));
   foreach ($schemes as $scheme) {
     file_unmanaged_delete_recursive($scheme . '://' . FILE_RESUP_TEMPORARY);
