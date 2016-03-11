@@ -3,3 +3,4 @@ description = Adds large files multiple and resumable upload to the File field w
 dependencies[] = file
 backdrop = 1.x
 version = 1.x-1.x
+type = module
