@@ -283,7 +283,7 @@ function file_resup_save_upload($element, $resup_file_id) {
   $file->filesize = $upload->filesize;
 
   // Support Transliteration.
-  if (module_exists('transliteration') && config_get('file_resup.settings', 'transliteration_file_uploads')) {
+  if (config_get('file_resup.settings', 'transliteration_file_uploads')) {
     $orig_filename = $file->filename;
     $file->filename = transliteration_clean_filename($file->filename);
   }
