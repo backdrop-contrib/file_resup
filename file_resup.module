@@ -117,7 +117,7 @@ function file_resup_upload() {
     if (!file_prepare_directory($directory, FILE_CREATE_DIRECTORY)) {
       backdrop_exit();
     }
-    file_create_htaccess($directory, TRUE);
+    file_save_htaccess($directory, TRUE);
 
     // Insert a new upload record.
     $upload = new stdClass();
